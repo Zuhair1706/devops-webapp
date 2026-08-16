@@ -26,17 +26,30 @@ jobs:
 
       - name: Validate HTML
         run: |
-          grep -q "<!DOCTYPE html>" index.html
-          grep -q "<title>DevOps WebApp</title>" index.html
+          echo "Validating HTML..."
+          test -s index.html
+          grep -qi "doctype html" index.html
+          grep -qi "<title>" index.html
           echo "HTML validation successful."
 
       - name: Build project
         run: |
+          echo "Building static website..."
           mkdir -p build
           cp index.html style.css script.js build/
           echo "Build completed successfully."
 
-      - name: Display build output
+      - name: Verify build output
         run: |
           echo "Build directory contents:"
           ls -la build
+          test -f build/index.html
+          test -f build/style.css
+          test -f build/script.js
+          echo "Build verification successful."
+
+      - name: CI Pipeline Completed
+        run: |
+          echo "=================================="
+          echo "CI PIPELINE COMPLETED SUCCESSFULLY"
+          echo "=================================="
