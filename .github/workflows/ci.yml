@@ -53,17 +53,61 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          curl -X POST \
-            -H 'Content-type: application/json' \
-            --data "{\"text\":\"✅ CI Pipeline Successful! Repository: $GITHUB_REPOSITORY | Branch: $GITHUB_REF_NAME | Commit: $GITHUB_SHA\"}" \
-            "$SLACK_WEBHOOK_URL"
+          python - <<'PY'
+          import os
+          import json
+          import urllib.request
+
+          webhook = os.environ["SLACK_WEBHOOK_URL"]
+
+          message = {
+              "text": "✅ CI Pipeline Successful!\nRepository: "
+                      + os.environ["GITHUB_REPOSITORY"]
+                      + "\nBranch: "
+                      + os.environ["GITHUB_REF_NAME"]
+          }
+
+          data = json.dumps(message).encode("utf-8")
+
+          request = urllib.request.Request(
+              webhook,
+              data=data,
+              headers={"Content-Type": "application/json"},
+              method="POST"
+          )
+
+          with urllib.request.urlopen(request) as response:
+              print("Slack response:", response.read().decode())
+          PY
 
       - name: Send Slack Failure Notification
         if: failure()
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          curl -X POST \
-            -H 'Content-type: application/json' \
-            --data "{\"text\":\"❌ CI Pipeline Failed! Repository: $GITHUB_REPOSITORY | Branch: $GITHUB_REF_NAME | Commit: $GITHUB_SHA\"}" \
-            "$SLACK_WEBHOOK_URL"
+          python - <<'PY'
+          import os
+          import json
+          import urllib.request
+
+          webhook = os.environ["SLACK_WEBHOOK_URL"]
+
+          message = {
+              "text": "❌ CI Pipeline Failed!\nRepository: "
+                      + os.environ["GITHUB_REPOSITORY"]
+                      + "\nBranch: "
+                      + os.environ["GITHUB_REF_NAME"]
+          }
+
+          data = json.dumps(message).encode("utf-8")
+
+          request = urllib.request.Request(
+              webhook,
+              data=data,
+              headers={"Content-Type": "application/json"},
+              method="POST"
+          )
+
+          with urllib.request.urlopen(request) as response:
+              print("Slack response:", response.read().decode())
+          PY
