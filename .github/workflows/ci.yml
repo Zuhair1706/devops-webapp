@@ -48,8 +48,22 @@ jobs:
           test -f build/script.js
           echo "Build verification successful."
 
-      - name: CI Pipeline Completed
+      - name: Send Slack Success Notification
+        if: success()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          echo "=================================="
-          echo "CI PIPELINE COMPLETED SUCCESSFULLY"
-          echo "=================================="
+          curl -X POST \
+            -H 'Content-type: application/json' \
+            --data "{\"text\":\"✅ CI Pipeline Successful! Repository: $GITHUB_REPOSITORY | Branch: $GITHUB_REF_NAME | Commit: $GITHUB_SHA\"}" \
+            "$SLACK_WEBHOOK_URL"
+
+      - name: Send Slack Failure Notification
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST \
+            -H 'Content-type: application/json' \
+            --data "{\"text\":\"❌ CI Pipeline Failed! Repository: $GITHUB_REPOSITORY | Branch: $GITHUB_REF_NAME | Commit: $GITHUB_SHA\"}" \
+            "$SLACK_WEBHOOK_URL"
